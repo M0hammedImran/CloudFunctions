@@ -9,8 +9,8 @@ type Token struct {
 }
 
 type StandardClaims struct {
-	ExpiresAt int64 `json:"exp,omitempty"`
 	Id        int64 `json:"id,omitempty"`
+	ExpiresAt int64 `json:"exp,omitempty"`
 	IssuedAt  int64 `json:"iat,omitempty"`
 }
 
