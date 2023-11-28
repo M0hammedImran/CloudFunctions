@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -15,8 +14,6 @@ import (
 
 func handler(ctx context.Context, event events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var AuthHeader = event.Headers["authorization"]
-	bytes, _ := json.MarshalIndent(event, "", "  ")
-	log.Println(string(bytes))
 
 	if AuthHeader == "" {
 		log.Println("Could not get the token from the header")
