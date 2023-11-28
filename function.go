@@ -1,11 +1,9 @@
 package EnterprizeRedirect
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 	"github.com/m0hammedimran/CloudFunctions/EnterpriseRedirection/types"
@@ -18,19 +16,9 @@ func init() {
 
 // EnterprizeRedirect is an HTTP Cloud Function with a request parameter.
 func EnterprizeRedirect(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.Header)
-	auth := r.Header.Get("Authorization")
-	if auth == "" {
-		log.Println("No Authorization header found")
-		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Fprintf(w, "Unauthorized")
-		return
-	}
-	auth = strings.Replace(auth, "Bearer ", "", 1)
-	log.Println(auth)
-
-	if auth == "" {
-		log.Println("No Authorization header found")
+	auth, err := utils.GetTokenFromHeader(r.Header)
+	if err != nil {
+		log.Println("Could not get the token from the header")
 		w.WriteHeader(http.StatusUnauthorized)
 		fmt.Fprintf(w, "Unauthorized")
 		return
@@ -44,15 +32,5 @@ func EnterprizeRedirect(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println(jwt)
-	prettyJWT, err := json.MarshalIndent(jwt, "", " ")
-	if err != nil {
-		log.Println("Could not Marshal this type")
-		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Fprintf(w, "Unauthorized")
-		return
-	}
-
-	addNewLine := append(prettyJWT, '\n')
-	fmt.Fprintf(w, "Hello, %s!", string(addNewLine))
+	fmt.Fprintf(w, "Valid Enterprize: %d", jwt.Claims.Id)
 }
