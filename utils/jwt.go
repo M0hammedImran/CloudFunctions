@@ -1,7 +1,9 @@
 package utils
 
 import (
+	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt"
@@ -48,4 +50,20 @@ func VerifyJWT(authToken string, secretKey string) (*types.StandardClaims, error
 	}
 
 	return nil, fmt.Errorf("invalid token")
+}
+
+func DecodeJwtClaim(authToken string) (types.StandardClaims, error) {
+	var tokenSegments = strings.Split(authToken, ".")
+	claimsBytes, err := jwt.DecodeSegment(tokenSegments[1])
+	if err != nil {
+		return types.StandardClaims{}, err
+	}
+
+	var standardClaims = types.StandardClaims{}
+	err = json.Unmarshal(claimsBytes, &standardClaims)
+	if err != nil {
+		return types.StandardClaims{}, err
+	}
+
+	return standardClaims, nil
 }
