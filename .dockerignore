@@ -1,0 +1,24 @@
+# Ignore all files and directories starting with a dot
+.*
+
+# Ignore the vendor directory
+vendor/
+
+# Ignore any build artifacts
+*.exe
+*.o
+*.a
+
+# Ignore any test coverage files
+*.cover
+
+# Ignore any editor-specific files
+.vscode/
+.idea/
+
+# Ignore any OS-specific files
+.DS_Store
+Thumbs.db
+
+bootstarp
+bootstarp.zip
