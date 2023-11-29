@@ -1,15 +1,16 @@
 package utils
 
 import (
-	"encoding/json"
 	"fmt"
-	"strings"
 	"time"
 
-	"github.com/golang-jwt/jwt"
-	"github.com/m0hammedimran/CloudFunctions/EnterpriseRedirection/types"
-	"github.com/mitchellh/mapstructure"
+	"github.com/golang-jwt/jwt/v5"
 )
+
+type MyClaims struct {
+	UserId int `json:"id,omitempty"`
+	jwt.RegisteredClaims
+}
 
 func GenerateJWT(secretKey string) (string, error) {
 	token := jwt.New(jwt.SigningMethodEdDSA)
@@ -25,45 +26,21 @@ func GenerateJWT(secretKey string) (string, error) {
 	return tokenString, nil
 }
 
-func VerifyJWT(authToken string, secretKey string) (*types.StandardClaims, error) {
-	token, err := jwt.Parse(authToken, func(token *jwt.Token) (interface{}, error) {
-		_, ok := token.Method.(*jwt.SigningMethodECDSA)
-		if !ok {
+func VerifyJWT(tokenString string, secretKey string) (*MyClaims, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &MyClaims{}, func(token *jwt.Token) (interface{}, error) {
+		// Don't forget to validate the alg is what you expect:
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
-		return secretKey, nil
+		return []byte(secretKey), nil
 	})
 
-	// parsing errors result
 	if err != nil {
 		return nil, err
+	} else if claims, ok := token.Claims.(*MyClaims); ok {
+		return claims, nil
 	}
 
-	var standardClaims = types.StandardClaims{}
-	claims, ok := token.Claims.(jwt.MapClaims)
-	mapstructure.Decode(claims, &standardClaims)
-
-	// if there's a token
-	if ok && token.Valid {
-		return &standardClaims, nil
-	}
-
-	return nil, fmt.Errorf("invalid token")
-}
-
-func DecodeJwtClaim(authToken string) (types.StandardClaims, error) {
-	var tokenSegments = strings.Split(authToken, ".")
-	claimsBytes, err := jwt.DecodeSegment(tokenSegments[1])
-	if err != nil {
-		return types.StandardClaims{}, err
-	}
-
-	var standardClaims = types.StandardClaims{}
-	err = json.Unmarshal(claimsBytes, &standardClaims)
-	if err != nil {
-		return types.StandardClaims{}, err
-	}
-
-	return standardClaims, nil
+	return nil, fmt.Errorf("unknown claims type, cannot proceed")
 }
