@@ -4,6 +4,5 @@ go 1.21.4
 
 require (
 	github.com/aws/aws-lambda-go v1.41.0
-	github.com/golang-jwt/jwt v3.2.2+incompatible
-	github.com/mitchellh/mapstructure v1.5.0
+	github.com/golang-jwt/jwt/v5 v5.1.0
 )
